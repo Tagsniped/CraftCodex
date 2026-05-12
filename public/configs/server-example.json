@@ -1,0 +1,18 @@
+{
+  "meta": {
+    "id": "server-example",
+    "name": "Server Example",
+    "type": "server",
+    "spriteBase": "/sprites/"
+  },
+  "items": {
+    "command_block": { "name": "Command Block", "category": "Server Utility", "method": "craft", "sprite": "command_block.svg", "notes": "Example custom server recipe for an item normally unavailable in survival." }
+  },
+  "stations": {
+    "Custom Workbench": { "layout": "grid", "columns": 3, "rows": 3 }
+  },
+  "recipes": [
+    { "id": "command_block.server", "output": { "id": "command_block", "qty": 1 }, "type": "craft", "station": "Custom Workbench", "ingredients": { "redstone": 8, "diamond": 1 }, "grid": [["redstone", "redstone", "redstone"], ["redstone", "diamond", "redstone"], ["redstone", "redstone", "redstone"]] }
+  ],
+  "extends": "vanilla-1.20"
+}

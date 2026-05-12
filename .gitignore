@@ -1,0 +1,8 @@
+node_modules/
+dist/
+*.log
+qa/
+craftpath-icon-exports/
+craftpath-packs/
+tools/craftpath-pack-builder/generated/
+tools/craftpath-pack-builder/out/

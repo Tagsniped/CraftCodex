@@ -1,0 +1,50 @@
+{
+  "meta": {
+    "id": "vanilla-1.20",
+    "name": "Vanilla 1.20",
+    "type": "minecraft-version",
+    "spriteBase": "/sprites/"
+  },
+  "stations": {
+    "Crafting Table": { "layout": "grid", "columns": 3, "rows": 3 },
+    "Inventory": { "layout": "grid", "columns": 2, "rows": 2 },
+    "Furnace": { "layout": "furnace", "slots": ["input", "fuel", "output"] },
+    "Brewing Stand": { "layout": "brewing", "slots": ["ingredient", "fuel", "bottle_1", "bottle_2", "bottle_3", "output"] },
+    "Smithing Table": { "layout": "smithing", "slots": ["template", "base", "addition", "output"] }
+  },
+  "items": {
+    "enchanting_table": { "name": "Enchanting Table", "category": "Utility", "method": "craft", "sprite": "enchanting_table.svg", "notes": "Craft after mining obsidian with a diamond pickaxe. Place near bookshelves for higher enchantment levels." },
+    "bookshelf": { "name": "Bookshelf", "category": "Decoration", "method": "craft", "sprite": "bookshelf.svg", "notes": "Fifteen bookshelves around an enchanting table unlock level 30 enchants." },
+    "diamond_pickaxe": { "name": "Diamond Pickaxe", "category": "Tools", "method": "craft", "sprite": "diamond_pickaxe.svg", "notes": "Required for mining obsidian. Bring water when mining lava pools." },
+    "comparator": { "name": "Redstone Comparator", "category": "Redstone", "method": "craft", "sprite": "comparator.svg", "notes": "Needs quartz from the Nether. Use for container readings, subtraction, and signal comparison." },
+    "book": { "name": "Book", "category": "Component", "method": "craft", "sprite": "book.svg", "notes": "Lootable from village bookshelves or crafted from paper and leather." },
+    "paper": { "name": "Paper", "category": "Component", "method": "craft", "sprite": "paper.svg", "notes": "Plant sugar cane near water to scale book production." },
+    "plank": { "name": "Wood Planks", "category": "Component", "method": "craft", "sprite": "plank.svg", "notes": "Any overworld log type works." },
+    "stick": { "name": "Stick", "category": "Component", "method": "craft", "sprite": "stick.svg", "notes": "Craft from planks or collect from leaf decay." },
+    "redstone_torch": { "name": "Redstone Torch", "category": "Component", "method": "craft", "sprite": "redstone_torch.svg", "notes": "A compact redstone signal source and comparator ingredient." },
+    "stone": { "name": "Stone", "category": "Block", "method": "smelt", "sprite": "stone.svg", "notes": "Smelt cobblestone in a furnace. Silk Touch also drops stone directly." },
+    "obsidian": { "name": "Obsidian", "category": "Raw", "method": "mine", "sprite": "obsidian.svg", "notes": "Create with water over lava source blocks. Mine with a diamond or netherite pickaxe." },
+    "diamond": { "name": "Diamond", "category": "Raw", "method": "mine", "sprite": "diamond.svg", "notes": "Mine diamond ore in deep overworld caves or branch mines. If you collect Diamond Ore with Silk Touch, smelt it in a furnace to recover diamonds." },
+    "diamond_ore": { "name": "Diamond Ore", "category": "Raw", "method": "mine", "sprite": "diamond_ore.svg", "notes": "Mine with Silk Touch to collect the ore block, then smelt it into a diamond." },
+    "leather": { "name": "Leather", "category": "Raw", "method": "find", "sprite": "leather.svg", "notes": "Collect from cows, horses, llamas, hoglins, or chest loot." },
+    "sugar_cane": { "name": "Sugar Cane", "category": "Raw", "method": "grow", "sprite": "sugar_cane.svg", "notes": "Find beside water, then farm on dirt or sand adjacent to water." },
+    "log": { "name": "Log", "category": "Raw", "method": "wood", "sprite": "log.svg", "notes": "Chop trees. Any log can become planks." },
+    "redstone": { "name": "Redstone Dust", "category": "Raw", "method": "mine", "sprite": "redstone.svg", "notes": "Mine redstone ore deep underground with iron tier or better." },
+    "nether_quartz": { "name": "Nether Quartz", "category": "Raw", "method": "find", "sprite": "nether_quartz.svg", "notes": "Mine quartz ore in the Nether. Bring gold armor and blocks." },
+    "cobblestone": { "name": "Cobblestone", "category": "Raw", "method": "mine", "sprite": "cobblestone.svg", "notes": "Mine regular stone without Silk Touch." },
+    "fuel": { "name": "Fuel", "category": "Raw", "method": "find", "sprite": "fuel.svg", "notes": "Coal, charcoal, logs, planks, lava buckets, and many other items work." }
+  },
+  "recipes": [
+    { "id": "enchanting_table.default", "output": { "id": "enchanting_table", "qty": 1 }, "type": "craft", "station": "Crafting Table", "ingredients": { "book": 1, "diamond": 2, "obsidian": 4 }, "grid": [["", "book", ""], ["diamond", "obsidian", "diamond"], ["obsidian", "obsidian", "obsidian"]] },
+    { "id": "bookshelf.default", "output": { "id": "bookshelf", "qty": 1 }, "type": "craft", "station": "Crafting Table", "ingredients": { "book": 3, "plank": 6 }, "grid": [["plank", "plank", "plank"], ["book", "book", "book"], ["plank", "plank", "plank"]] },
+    { "id": "diamond_pickaxe.default", "output": { "id": "diamond_pickaxe", "qty": 1 }, "type": "craft", "station": "Crafting Table", "ingredients": { "diamond": 3, "stick": 2 }, "grid": [["diamond", "diamond", "diamond"], ["", "stick", ""], ["", "stick", ""]] },
+    { "id": "diamond.smelt_ore", "output": { "id": "diamond", "qty": 1 }, "type": "smelt", "station": "Furnace", "ingredients": { "diamond_ore": 1, "fuel": 1 }, "grid": [["diamond_ore", "", ""], ["fuel", "", ""], ["", "", ""]] },
+    { "id": "comparator.default", "output": { "id": "comparator", "qty": 1 }, "type": "craft", "station": "Crafting Table", "ingredients": { "redstone_torch": 3, "nether_quartz": 1, "stone": 3 }, "grid": [["", "redstone_torch", ""], ["redstone_torch", "nether_quartz", "redstone_torch"], ["stone", "stone", "stone"]] },
+    { "id": "book.default", "output": { "id": "book", "qty": 1 }, "type": "craft", "station": "Crafting Table", "ingredients": { "paper": 3, "leather": 1 }, "grid": [["paper", "paper", ""], ["paper", "leather", ""], ["", "", ""]] },
+    { "id": "paper.default", "output": { "id": "paper", "qty": 3 }, "type": "craft", "station": "Crafting Table", "ingredients": { "sugar_cane": 3 }, "grid": [["", "", ""], ["sugar_cane", "sugar_cane", "sugar_cane"], ["", "", ""]] },
+    { "id": "plank.default", "output": { "id": "plank", "qty": 4 }, "type": "craft", "station": "Inventory", "ingredients": { "log": 1 }, "grid": [["log", ""], ["", ""]] },
+    { "id": "stick.default", "output": { "id": "stick", "qty": 4 }, "type": "craft", "station": "Crafting Table", "ingredients": { "plank": 2 }, "grid": [["plank", "", ""], ["plank", "", ""], ["", "", ""]] },
+    { "id": "redstone_torch.default", "output": { "id": "redstone_torch", "qty": 1 }, "type": "craft", "station": "Crafting Table", "ingredients": { "redstone": 1, "stick": 1 }, "grid": [["redstone", "", ""], ["stick", "", ""], ["", "", ""]] },
+    { "id": "stone.default", "output": { "id": "stone", "qty": 1 }, "type": "smelt", "station": "Furnace", "ingredients": { "cobblestone": 1, "fuel": 1 }, "grid": [["cobblestone", "", ""], ["fuel", "", ""], ["", "", ""]] }
+  ]
+}
