@@ -22,10 +22,13 @@ import {
 } from "lucide-react";
 import "./styles.css";
 
+const BASE_URL = import.meta.env.BASE_URL || "/";
+const assetUrl = (path) => `${BASE_URL}${path.replace(/^\//, "")}`;
+
 const BUILT_IN_CONFIGS = [
-  { id: "minecraft-26.1.2", name: "Minecraft 26.1.2", url: "/packs/minecraft-26.1.2.zip", format: "minecraft-zip" },
-  { id: "vanilla-1.20", name: "Vanilla 1.20", url: "/configs/vanilla-1.20.json" },
-  { id: "server-example", name: "Server Example", url: "/configs/server-example.json" },
+  { id: "minecraft-26.1.2", name: "Minecraft 26.1.2", url: "packs/minecraft-26.1.2.zip", format: "minecraft-zip" },
+  { id: "vanilla-1.20", name: "Vanilla 1.20", url: "configs/vanilla-1.20.json" },
+  { id: "server-example", name: "Server Example", url: "configs/server-example.json" },
 ];
 
 const STARTING_GOALS = [
@@ -56,12 +59,18 @@ function mergeConfigs(base, overlay) {
 
 async function loadConfigFile(entry) {
   if (entry.format === "minecraft-zip" || entry.url?.toLowerCase().endsWith(".zip")) {
-    const blob = await fetch(entry.url).then((response) => response.blob());
+    const blob = await fetch(assetUrl(entry.url)).then((response) => {
+      if (!response.ok) throw new Error(`Could not fetch ${entry.url}`);
+      return response.blob();
+    });
     return minecraftZipToConfig(new File([blob], entry.url.split("/").pop() || `${entry.id}.zip`), false, entry.id);
   }
-  const config = await fetch(entry.url).then((response) => response.json());
+  const config = await fetch(assetUrl(entry.url)).then((response) => {
+    if (!response.ok) throw new Error(`Could not fetch ${entry.url}`);
+    return response.json();
+  });
   if (config.extends === "vanilla-1.20") {
-    const base = await fetch("/configs/vanilla-1.20.json").then((response) => response.json());
+    const base = await fetch(assetUrl("configs/vanilla-1.20.json")).then((response) => response.json());
     return mergeConfigs(base, config);
   }
   return config;
@@ -469,7 +478,7 @@ function computePlan(goals, craftSteps, completedItems, config) {
 }
 
 function spriteFor(config, id, seen = new Set()) {
-  if (seen.has(id)) return `${config.meta?.spriteBase || "/sprites/"}${id}.svg`;
+  if (seen.has(id)) return assetUrl(`sprites/${id}.svg`);
   seen.add(id);
   const item = config.items[id];
   const sprite = item?.sprite;
@@ -478,14 +487,15 @@ function spriteFor(config, id, seen = new Set()) {
     if (sprite.type === "player_head") return playerHeadDataUrl(sprite.texture || sprite.value || sprite.username || "");
     if (sprite.src) return sprite.src;
   }
-  const base = config.meta?.spriteBase || "/sprites/";
+  const base = config.meta?.spriteBase || "sprites/";
   if (typeof sprite === "string") {
     if (sprite.startsWith("item:")) return spriteFor(config, sprite.slice("item:".length), seen);
     if (sprite.startsWith("player_head:")) return playerHeadDataUrl(sprite.slice("player_head:".length));
-    if (sprite.startsWith("data:") || sprite.startsWith("blob:") || sprite.startsWith("/")) return sprite;
+    if (sprite.startsWith("data:") || sprite.startsWith("blob:")) return sprite;
+    if (sprite.startsWith("/")) return assetUrl(sprite);
     if (config.items[sprite]) return spriteFor(config, sprite, seen);
   }
-  return `${base}${sprite || `${id}.svg`}`;
+  return assetUrl(`${base}${sprite || `${id}.svg`}`);
 }
 
 function playerHeadDataUrl(value = "") {
