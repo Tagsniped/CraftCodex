@@ -2293,6 +2293,12 @@ button {
   font-size: 12px;
 }
 
+.mobile-menu-button,
+.mobile-sidebar-button,
+.mobile-category-chips {
+  display: none;
+}
+
 @media (max-width: 1120px) {
   .app-shell {
     grid-template-columns: 270px minmax(0, 1fr);
@@ -2385,5 +2391,542 @@ button {
 
   .resource-list {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1120px) {
+  .app-shell,
+  .app-shell.browser-shell,
+  .app-shell.browser-editor-shell,
+  .app-shell.builder-shell,
+  .app-shell.settings-shell,
+  .app-shell.right-collapsed,
+  .app-shell.browser-shell.right-collapsed {
+    grid-template-columns: 248px minmax(0, 1fr);
+    gap: 12px;
+    padding: 12px;
+  }
+
+  .app-header {
+    grid-template-columns: minmax(210px, 1fr) minmax(0, auto);
+  }
+
+  .mode-toggle {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .header-tools {
+    grid-column: 1 / -1;
+    justify-content: stretch;
+  }
+
+  .header-tools .version-select {
+    flex: 1 1 auto;
+  }
+
+  .workspace,
+  .browser-shell .workspace,
+  .builder-shell .workspace,
+  .settings-shell .workspace,
+  .left-collapsed .workspace,
+  .left-collapsed.browser-shell .workspace,
+  .left-collapsed.browser-editor-shell .workspace {
+    grid-column: 2 / -1;
+  }
+
+  .app-shell.left-collapsed,
+  .app-shell.left-collapsed.right-collapsed,
+  .app-shell.builder-shell.left-collapsed,
+  .app-shell.settings-shell.left-collapsed,
+  .app-shell.browser-shell.left-collapsed.right-collapsed {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-shell.left-collapsed .workspace,
+  .app-shell.left-collapsed.right-collapsed .workspace,
+  .app-shell.builder-shell.left-collapsed .workspace,
+  .app-shell.settings-shell.left-collapsed .workspace,
+  .app-shell.browser-shell.left-collapsed.right-collapsed .workspace {
+    grid-column: 1 / -1;
+  }
+
+  .checklist {
+    grid-column: 2 / -1;
+  }
+
+  .material-board {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 14px;
+    padding: 16px;
+  }
+
+  .material-head {
+    min-height: 94px;
+    padding: 16px 54px 16px 16px;
+  }
+
+  .material-head b {
+    top: 16px;
+    right: 16px;
+  }
+
+  .material-head strong {
+    font-size: 16px;
+  }
+
+  .browser-grid.icon-only,
+  .browser-grid.flat.icon-only {
+    grid-template-columns: repeat(auto-fill, minmax(54px, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  html,
+  body,
+  #root {
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  button,
+  input,
+  select,
+  textarea,
+  .settings-button,
+  .settings-row button,
+  .import-button,
+  .primary-action,
+  .category-row,
+  .goal-row,
+  .resource-row,
+  .browser-card,
+  .craft-step-head,
+  .material-head {
+    min-height: 44px;
+  }
+
+  .app-shell,
+  .app-shell.browser-shell,
+  .app-shell.browser-editor-shell,
+  .app-shell.builder-shell,
+  .app-shell.settings-shell,
+  .app-shell.left-collapsed,
+  .app-shell.right-collapsed,
+  .app-shell.left-collapsed.right-collapsed,
+  .app-shell.browser-shell.left-collapsed.right-collapsed,
+  .app-shell.builder-shell.left-collapsed,
+  .app-shell.settings-shell.left-collapsed {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    gap: 10px;
+    width: 100%;
+    min-height: 100dvh;
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 10px 10px 78px;
+  }
+
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    grid-template-columns: minmax(0, 1fr) 44px 44px;
+    gap: 8px;
+    padding: 10px;
+  }
+
+  .brand h1 {
+    font-size: 20px;
+  }
+
+  .mobile-menu-button,
+  .mobile-sidebar-button {
+    display: grid;
+    place-items: center;
+  }
+
+  .header-tools {
+    display: none;
+  }
+
+  .header-tools.open {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+    justify-content: stretch;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--line);
+  }
+
+  .header-tools.open .settings-button,
+  .header-tools.open .version-select {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  .header-tools.open .settings-button.icon-only {
+    display: none;
+  }
+
+  .version-select {
+    margin-top: 0;
+  }
+
+  .version-value {
+    max-width: none;
+  }
+
+  .mode-toggle {
+    position: fixed;
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+    z-index: 60;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    width: auto;
+    box-shadow: var(--shadow);
+  }
+
+  .mode-toggle button {
+    min-height: 48px;
+    padding: 0 8px;
+    font-size: 12px;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 82px;
+    bottom: 74px;
+    left: 10px;
+    z-index: 45;
+    width: min(330px, calc(100vw - 20px));
+    max-width: calc(100vw - 20px);
+    padding: 14px;
+    overflow: auto;
+    box-shadow: 0 22px 70px rgba(0, 0, 0, 0.48);
+  }
+
+  .search-box {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    min-height: 44px;
+  }
+
+  .goal-row {
+    grid-template-columns: 32px minmax(0, 1fr) 62px 44px;
+  }
+
+  .goal-row input,
+  .icon-button {
+    min-height: 44px;
+  }
+
+  .icon-button {
+    width: 44px;
+    height: 44px;
+  }
+
+  .workspace,
+  .browser-shell .workspace,
+  .builder-shell .workspace,
+  .settings-shell .workspace,
+  .left-collapsed .workspace,
+  .left-collapsed.browser-shell .workspace,
+  .left-collapsed.browser-editor-shell .workspace,
+  .left-collapsed.right-collapsed .workspace,
+  .left-collapsed.builder-shell .workspace,
+  .left-collapsed.settings-shell .workspace,
+  .left-collapsed.browser-shell.right-collapsed .workspace {
+    display: block;
+    grid-column: 1 / -1;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .topbar {
+    margin-bottom: 10px;
+    padding: 14px;
+  }
+
+  .topbar h2 {
+    font-size: 18px;
+  }
+
+  .material-board {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    overflow: visible;
+    padding: 12px;
+  }
+
+  .material-head {
+    grid-template-columns: 46px minmax(0, 1fr);
+  }
+
+  .recipe-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .checklist {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-rows: auto auto auto;
+    gap: 12px;
+    min-height: 0;
+    overflow: visible;
+    padding: 14px;
+  }
+
+  .progress-card {
+    align-items: center;
+  }
+
+  .progress-ring {
+    width: 58px;
+    height: 58px;
+  }
+
+  .progress-ring span {
+    width: 44px;
+    height: 44px;
+  }
+
+  .resource-list,
+  .next-actions {
+    overflow: visible;
+  }
+
+  .resource-row {
+    grid-template-columns: 28px 32px minmax(0, 1fr) auto;
+    padding: 8px;
+  }
+
+  .recipe-browser,
+  .item-page,
+  .recipe-builder,
+  .settings-page {
+    overflow: visible;
+    padding: 12px;
+  }
+
+  .browser-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .browser-toolbar-controls {
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .toggle-control {
+    min-height: 44px;
+  }
+
+  .mobile-category-chips {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 4px;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+
+  .mobile-category-chips button {
+    flex: 0 0 auto;
+    min-height: 44px;
+    padding: 0 12px;
+    background: var(--row-bg);
+    border: 1px solid var(--control-border);
+    color: var(--muted);
+  }
+
+  .mobile-category-chips button.active {
+    color: var(--text);
+    border-color: hsl(var(--accent-hue) 74% 58% / 0.75);
+    background: hsl(var(--accent-hue) 74% 58% / 0.12);
+  }
+
+  .browser-grid,
+  .browser-grid.flat,
+  .browser-grid.icon-only,
+  .browser-grid.flat.icon-only {
+    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+    gap: 6px;
+  }
+
+  .browser-card,
+  .browser-grid.icon-only .browser-card {
+    min-height: 50px;
+    padding: 6px;
+  }
+
+  .browser-card .slot {
+    width: 32px;
+    height: 32px;
+  }
+
+  .browser-card strong {
+    font-size: 10px;
+  }
+
+  .browser-group {
+    margin-bottom: 12px;
+  }
+
+  .browser-group-title {
+    min-height: 36px;
+  }
+
+  .modal-backdrop {
+    align-items: end;
+    place-items: end stretch;
+    padding: 0;
+    z-index: 80;
+  }
+
+  .item-modal {
+    width: 100%;
+    max-height: min(82dvh, 720px);
+    overflow: auto;
+    border-width: 2px 0 0;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+
+  .item-modal-head {
+    grid-template-columns: 48px minmax(0, 1fr) 44px;
+  }
+
+  .modal-recipe {
+    grid-template-columns: 1fr;
+    padding: 16px;
+  }
+
+  .modal-foot {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 12px 16px 16px;
+  }
+
+  .settings-row,
+  .pack-status-row,
+  .builder-summary {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .settings-row > *,
+  .settings-row label,
+  .settings-row select,
+  .settings-row button,
+  .import-button,
+  .hue-control,
+  .pack-status-row > *,
+  .builder-summary > *,
+  .empty-builder {
+    width: 100%;
+    max-width: none;
+  }
+
+  .hue-control {
+    grid-template-columns: 1fr;
+  }
+
+  .builder-config-panel {
+    padding: 14px;
+  }
+
+  .config-editor,
+  .editor-grid,
+  .recipe-form-grid,
+  .sprite-picker,
+  .slot-picker {
+    grid-template-columns: 1fr;
+  }
+
+  .config-editor button {
+    width: 100%;
+  }
+
+  .recipe-builder-layout {
+    max-width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .shaped-builder,
+  .furnace-builder,
+  .smithing-builder,
+  .brewing-builder {
+    width: max-content;
+    min-width: 100%;
+  }
+}
+
+@media (max-width: 640px) {
+  .app-shell,
+  .app-shell.browser-shell,
+  .app-shell.browser-editor-shell,
+  .app-shell.builder-shell,
+  .app-shell.settings-shell {
+    padding: 8px 8px 78px;
+  }
+
+  .app-header {
+    grid-template-columns: minmax(0, 1fr) 44px 44px;
+    padding: 8px;
+  }
+
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+  }
+
+  .brand h1 {
+    font-size: 18px;
+  }
+
+  .topbar,
+  .material-board,
+  .recipe-browser,
+  .item-page,
+  .recipe-builder,
+  .settings-page,
+  .checklist {
+    padding: 10px;
+  }
+
+  .browser-grid,
+  .browser-grid.flat,
+  .browser-grid.icon-only,
+  .browser-grid.flat.icon-only {
+    grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+    gap: 5px;
+  }
+
+  .browser-card,
+  .browser-grid.icon-only .browser-card {
+    min-height: 48px;
+    padding: 5px;
+  }
+
+  .browser-card .slot {
+    width: 30px;
+    height: 30px;
+  }
+
+  .resource-row {
+    grid-template-columns: 28px 32px minmax(0, 1fr) auto;
+  }
+
+  .resource-copy em {
+    display: none;
   }
 }

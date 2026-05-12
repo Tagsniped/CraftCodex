@@ -9,6 +9,7 @@ import {
   FileJson,
   Hammer,
   Info,
+  Menu,
   PanelLeft,
   PanelRight,
   Pickaxe,
@@ -1170,8 +1171,10 @@ function App() {
   const [expandedCraftStep, setExpandedCraftStep] = useState("");
   const [recipeChoices, setRecipeChoices] = useState({});
   const [tagSelections, setTagSelections] = useState({});
-  const [leftSidebarOpen, setLeftSidebarOpen] = useState(true);
+  const [leftSidebarOpen, setLeftSidebarOpen] = useState(() => (typeof window === "undefined" ? true : !window.matchMedia("(max-width: 767px)").matches));
   const [rightSidebarOpen, setRightSidebarOpen] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isNarrowViewport, setIsNarrowViewport] = useState(() => (typeof window === "undefined" ? false : window.matchMedia("(max-width: 767px)").matches));
   const [themeMode, setThemeMode] = useState(() => localStorage.getItem("craftpath.themeMode") || "dark");
   const [accentHue, setAccentHue] = useState(() => Number(localStorage.getItem("craftpath.accentHue") || 38));
   const [customText, setCustomText] = useState("");
@@ -1215,6 +1218,25 @@ function App() {
     localStorage.setItem("craftpath.accentHue", String(accentHue));
   }, [themeMode, accentHue]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const media = window.matchMedia("(max-width: 767px)");
+    const syncViewport = () => {
+      setIsNarrowViewport(media.matches);
+      if (media.matches) {
+        setLeftSidebarOpen(false);
+        setRightSidebarOpen(false);
+      } else {
+        setLeftSidebarOpen(true);
+        setRightSidebarOpen(true);
+        setMobileMenuOpen(false);
+      }
+    };
+    syncViewport();
+    media.addEventListener("change", syncViewport);
+    return () => media.removeEventListener("change", syncViewport);
+  }, []);
+
   const recipeLookup = useMemo(() => (config ? recipesByOutput(config) : {}), [config]);
   const plan = useMemo(() => (config ? computePlan(goals, craftSteps, completedItems, config) : { needs: {}, readyCrafts: [] }), [goals, craftSteps, completedItems, config]);
 
@@ -1251,7 +1273,7 @@ function App() {
   const currentIsEditable = Boolean(config.meta?.editable);
   const currentIsLocked = Boolean(config.meta?.locked);
   const selectedConfigEntry = allConfigEntries.find((entry) => entry.id === configId) || allConfigEntries[0];
-  const rightRailVisible = rightSidebarOpen && ((mode === "planner") || (mode === "browser"));
+  const rightRailVisible = !isNarrowViewport && rightSidebarOpen && ((mode === "planner") || (mode === "browser"));
 
   function openItemModal(id) {
     setItemModal(id);
@@ -1511,7 +1533,7 @@ function App() {
   }
 
   return (
-    <main className={`app-shell ${mode === "browser" ? "browser-shell" : ""} ${mode === "browser" && currentIsEditable ? "browser-editor-shell" : ""} ${mode === "builder" ? "builder-shell" : ""} ${mode === "settings" ? "settings-shell" : ""} ${leftSidebarOpen ? "" : "left-collapsed"} ${rightRailVisible ? "" : "right-collapsed"}`}>
+    <main className={`app-shell ${mode === "browser" ? "browser-shell" : ""} ${mode === "browser" && currentIsEditable ? "browser-editor-shell" : ""} ${mode === "builder" ? "builder-shell" : ""} ${mode === "settings" ? "settings-shell" : ""} ${leftSidebarOpen ? "" : "left-collapsed"} ${rightRailVisible ? "" : "right-collapsed"} ${mobileMenuOpen ? "mobile-menu-open" : ""}`}>
       <header className="app-header">
         <div className="brand compact">
           <div className="brand-mark"><Pickaxe size={19} /></div>
@@ -1519,12 +1541,18 @@ function App() {
             <h1>CraftCodex</h1>
           </div>
         </div>
+        <button className="mobile-menu-button settings-button icon-only" onClick={() => setMobileMenuOpen((value) => !value)} aria-label="Open navigation menu" aria-expanded={mobileMenuOpen}>
+          <Menu size={18} />
+        </button>
+        <button className="mobile-sidebar-button settings-button icon-only" onClick={() => setLeftSidebarOpen((value) => !value)} aria-label={leftSidebarOpen ? "Hide item drawer" : "Show item drawer"} aria-expanded={leftSidebarOpen}>
+          <PanelLeft size={18} />
+        </button>
         <div className="mode-toggle" aria-label="App mode">
-          <button className={mode === "planner" ? "active" : ""} onClick={() => { setMode("planner"); setItemPage(""); }}>Collection Planner</button>
-          <button className={mode === "browser" ? "active" : ""} onClick={() => { setMode("browser"); setItemPage(""); }}>Item Browser</button>
-          <button className={mode === "builder" ? "active" : ""} onClick={() => { setMode("builder"); setItemPage(""); }}>Recipe Builder</button>
+          <button className={mode === "planner" ? "active" : ""} onClick={() => { setMode("planner"); setItemPage(""); setMobileMenuOpen(false); }}>Collection Planner</button>
+          <button className={mode === "browser" ? "active" : ""} onClick={() => { setMode("browser"); setItemPage(""); setMobileMenuOpen(false); }}>Item Browser</button>
+          <button className={mode === "builder" ? "active" : ""} onClick={() => { setMode("builder"); setItemPage(""); setMobileMenuOpen(false); }}>Recipe Builder</button>
         </div>
-        <div className="header-tools">
+        <div className={`header-tools ${mobileMenuOpen ? "open" : ""}`}>
           <label className="version-select">
             <Tag size={14} />
             <span>Version</span>
@@ -1541,7 +1569,7 @@ function App() {
           <button className="settings-button icon-only" onClick={() => setRightSidebarOpen((value) => !value)} aria-label={rightSidebarOpen ? "Hide right sidebar" : "Show right sidebar"} title={rightSidebarOpen ? "Hide right sidebar" : "Show right sidebar"}>
             <PanelRight size={16} />
           </button>
-          <button className={`settings-button ${mode === "settings" ? "active" : ""}`} onClick={() => { setMode("settings"); setItemPage(""); }}>
+          <button className={`settings-button ${mode === "settings" ? "active" : ""}`} onClick={() => { setMode("settings"); setItemPage(""); setMobileMenuOpen(false); }}>
             <Settings size={16} /> Settings
           </button>
         </div>
@@ -1743,6 +1771,13 @@ function App() {
             />
           ) : (
             <section className="recipe-browser">
+              <div className="mobile-category-chips" aria-label="Browse categories">
+                {categories.map((category) => (
+                  <button className={browserCategory === category ? "active" : ""} key={category} onClick={() => setBrowserCategory(category)}>
+                    {category}
+                  </button>
+                ))}
+              </div>
               <div className="browser-toolbar">
                 <span>{browserCategory} · {browserItems.length} items</span>
                 <div className="browser-toolbar-controls">
@@ -1850,7 +1885,7 @@ function App() {
         )}
       </section>
 
-      {mode === "planner" && rightSidebarOpen ? <aside className="checklist">
+      {mode === "planner" && (rightSidebarOpen || isNarrowViewport) ? <aside className="checklist">
         {mode === "planner" ? (
           <>
             <div className="progress-card">
@@ -1908,7 +1943,7 @@ function App() {
           </>
         ) : null}
       </aside> : null}
-      {mode === "browser" && rightSidebarOpen ? (
+      {mode === "browser" && rightRailVisible ? (
         <ItemInspector
           config={config}
           itemId={itemModal || itemPage}
@@ -1919,7 +1954,7 @@ function App() {
           onOpenPage={openItemPage}
         />
       ) : null}
-      {mode === "browser" && rightSidebarOpen ? null : <ItemInfoModal
+      {mode === "browser" && rightRailVisible ? null : <ItemInfoModal
         config={config}
         itemId={itemModal}
         recipes={modalRecipes}
