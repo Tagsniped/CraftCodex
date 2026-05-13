@@ -5,6 +5,7 @@ import {
   Check,
   ChevronLeft,
   ChevronRight,
+  Download,
   FileJson,
   Hammer,
   Info,
@@ -34,8 +35,14 @@ import ConfigEditor from "./components/ConfigEditor.jsx";
 
 export default function App() {
   const [config, setConfig] = useState(null);
-  const [configId, setConfigId] = useState("minecraft-26.1.2");
-  const [customConfigs, setCustomConfigs] = useState(() => JSON.parse(localStorage.getItem("craftpath.configs") || "[]"));
+  const [configId, setConfigId] = useState(() => localStorage.getItem("craftpath.configId") || "minecraft-26.1.2");
+  const [customConfigs, setCustomConfigs] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("craftpath.configs") || "[]");
+    } catch {
+      return [];
+    }
+  });
   const [mode, setMode] = useState("planner");
   const [itemModal, setItemModal] = useState("");
   const [itemPage, setItemPage] = useState("");
@@ -82,6 +89,10 @@ export default function App() {
       setTagSelections({});
     }
     load().catch(() => setMessage("Could not load that config file."));
+  }, [configId, customConfigs]);
+
+  useEffect(() => {
+    localStorage.setItem("craftpath.configId", configId);
   }, [configId]);
 
   useEffect(() => {
@@ -228,6 +239,7 @@ export default function App() {
   function replaceCurrentConfig(nextConfig) {
     setConfig(nextConfig);
     setCustomConfigs((current) => [...current.filter((cfg) => cfg.meta.id !== nextConfig.meta.id), nextConfig]);
+    localStorage.setItem("craftpath.configId", nextConfig.meta.id);
   }
 
   function importConfigObject(nextConfig, options = {}) {
@@ -248,8 +260,25 @@ export default function App() {
     };
     setCustomConfigs((current) => [...current.filter((cfg) => cfg.meta.id !== normalized.meta.id), normalized]);
     setConfigId(normalized.meta.id);
+    localStorage.setItem("craftpath.configId", normalized.meta.id);
     setCustomText(JSON.stringify(normalized, null, 2));
     setMessage(`Imported ${normalized.meta.name} with ${normalized.recipes.length} recipes and ${Object.keys(normalized.items).length} items.`);
+  }
+
+  function downloadCurrentConfig() {
+    if (!config) return;
+    const json = JSON.stringify(config, null, 2);
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    const safeName = (config.meta?.name || config.meta?.id || "recipe-pack").toLowerCase().replace(/[^a-z0-9_-]+/g, "-").replace(/^-+|-+$/g, "") || "recipe-pack";
+    link.href = url;
+    link.download = `${safeName}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    setMessage(`Downloaded ${config.meta?.name || "recipe pack"}.`);
   }
 
   function handleFileImport(event) {
@@ -563,6 +592,7 @@ export default function App() {
                   <span>Import as editable</span>
                 </label>
                 <button onClick={createEditableCopy}><FileJson size={16} /> Create editable copy</button>
+                <button onClick={downloadCurrentConfig}><Download size={16} /> Download pack</button>
                 {currentIsEditable ? <button onClick={toggleCurrentLock}>{currentIsLocked ? "Unlock config" : "Lock config"}</button> : null}
               </div>
               <details className="advanced-json">
