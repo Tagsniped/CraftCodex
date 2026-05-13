@@ -601,7 +601,7 @@ button {
 
 .workspace {
   display: grid;
-  grid-template-rows: auto auto minmax(420px, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
   gap: 16px;
   min-height: 0;
   overflow: hidden;
@@ -729,6 +729,7 @@ button {
 
 .settings-panel {
   display: grid;
+  align-content: start;
   gap: 12px;
   padding: 16px;
 }
@@ -836,10 +837,28 @@ button {
   border: 1px solid var(--control-border);
 }
 
+.builder-config-panel .settings-row {
+  align-items: end;
+  gap: 10px;
+  padding: 10px;
+  background: var(--row-bg);
+  border: 1px solid var(--control-border);
+}
+
+.builder-config-panel .settings-row label:not(.import-button):not(.toggle-control) {
+  min-width: min(230px, 100%);
+}
+
+.builder-config-panel .settings-row button,
+.builder-config-panel .import-button,
+.builder-config-panel .settings-toggle {
+  min-height: 38px;
+}
+
 .config-editor {
   display: grid;
   grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 14px;
+  gap: 16px;
   padding-top: 12px;
   border-top: 1px solid var(--line);
 }
@@ -852,10 +871,16 @@ button {
   display: grid;
   gap: 10px;
   align-content: start;
+  min-width: 0;
+  padding: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--control-border);
 }
 
 .config-editor h3 {
-  margin: 0;
+  margin: 0 0 2px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
 }
 
 .editor-grid {
@@ -883,6 +908,21 @@ button {
 .sprite-picker select,
 .sprite-picker input {
   width: 100%;
+}
+
+.item-notes-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.config-editor .item-notes-field textarea {
+  min-height: 118px;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .editor-grid input,
@@ -1162,6 +1202,7 @@ button {
   grid-template-columns: repeat(auto-fill, minmax(216px, 1fr));
   align-content: start;
   gap: 14px;
+  min-height: 0;
   overflow: auto;
   padding: 18px;
   background: var(--canvas-bg);
@@ -1530,8 +1571,12 @@ button {
   margin-bottom: 14px;
 }
 
-.edit-item-action {
-  width: max-content;
+.item-page-actions .back-button,
+.item-page-actions .primary-action {
+  flex: 1 1 0;
+  width: auto;
+  min-height: var(--header-control-height);
+  margin-bottom: 0;
 }
 
 .item-inspector {
@@ -1611,6 +1656,109 @@ button {
   justify-items: start;
   align-content: start;
   gap: 10px;
+}
+
+.item-switcher {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
+  overflow: hidden;
+}
+
+.item-switcher-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  align-content: start;
+  gap: 7px;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 2px;
+}
+
+.item-switcher-card {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 44px;
+  padding: 5px;
+  background: var(--row-bg);
+  border: 1px solid var(--control-border);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.item-switcher-card:hover,
+.item-switcher-card.active {
+  border-color: hsl(var(--accent-hue) 74% 58% / 0.8);
+  background: hsl(var(--accent-hue) 74% 58% / 0.12);
+}
+
+.item-edit-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.item-edit-form.compact {
+  grid-template-columns: 1fr;
+}
+
+.item-edit-form label {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.item-edit-form input,
+.item-edit-form select,
+.item-edit-form textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 36px;
+  padding: 0 9px;
+  color: var(--text);
+  background: var(--control-bg);
+  border: 1px solid var(--control-border);
+}
+
+.item-edit-form input:disabled {
+  color: var(--muted);
+  opacity: 0.75;
+}
+
+.item-edit-sprite,
+.item-edit-notes,
+.item-edit-actions {
+  grid-column: 1 / -1;
+}
+
+.item-edit-sprite {
+  display: grid;
+  grid-template-columns: minmax(0, 160px) minmax(0, 1fr) 46px;
+  align-items: end;
+  gap: 8px;
+}
+
+.item-edit-notes textarea {
+  min-height: 118px;
+  padding: 9px;
+  resize: vertical;
+  font: inherit;
+  line-height: 1.45;
+}
+
+.item-edit-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.item-edit-actions .back-button {
+  width: auto;
+  min-height: var(--header-control-height);
+  margin-bottom: 0;
 }
 
 .item-page {
@@ -2846,6 +2994,8 @@ button {
   .config-editor,
   .editor-grid,
   .recipe-form-grid,
+  .item-edit-form,
+  .item-edit-sprite,
   .sprite-picker,
   .slot-picker {
     grid-template-columns: 1fr;

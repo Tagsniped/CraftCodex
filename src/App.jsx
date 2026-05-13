@@ -166,35 +166,10 @@ export default function App() {
     setMode("browser");
   }
 
-  function editItemFromPage(id, recipe) {
-    const item = items[id] || {};
-    const sprite = item.sprite || `${id}.svg`;
-    const spriteMode = typeof sprite === "object" && sprite.type === "item" ? "existing" : typeof sprite === "object" && sprite.type === "player_head" ? "head" : typeof sprite === "string" && (sprite.startsWith("item:") || items[sprite]) ? "existing" : typeof sprite === "string" && sprite.startsWith("player_head:") ? "head" : "custom";
-    setNewItem({
-      id,
-      name: item.name || id,
-      category: item.category || "",
-      method: item.method || "craft",
-      spriteMode,
-      spriteItem: typeof sprite === "object" && sprite.type === "item" ? sprite.id : typeof sprite === "string" && sprite.startsWith("item:") ? sprite.slice("item:".length) : typeof sprite === "string" && items[sprite] ? sprite : "",
-      sprite: spriteMode === "custom" ? sprite : "",
-      spriteHead: typeof sprite === "object" && sprite.type === "player_head" ? sprite.texture || sprite.value || sprite.username || "" : typeof sprite === "string" && sprite.startsWith("player_head:") ? sprite.slice("player_head:".length) : "",
-      notes: item.notes || "",
-    });
-    if (recipe) {
-      beginRecipeEdit(recipe.id);
-    } else {
-      createRecipeDraft({
-        id: `${id}.custom-${Date.now()}`,
-        output: { id, qty: 1 },
-        type: "craft",
-        station: "Crafting Table",
-        ingredients: {},
-        grid: [["", "", ""], ["", "", ""], ["", "", ""]],
-      });
-    }
-    setMode("builder");
-    setItemPage("");
+  function saveItemDetails(id, nextItem) {
+    if (currentIsLocked) return;
+    replaceCurrentConfig({ ...config, items: { ...config.items, [id]: nextItem } });
+    setMessage(`Saved item ${nextItem.name || id}.`);
   }
 
   function handleMaterialCardClick(id, isCraftable, completed) {
@@ -518,20 +493,22 @@ export default function App() {
       </aside> : null}
 
       <section className="workspace">
-        <header className="topbar">
-          <div>
-            <h2>{mode === "planner" ? "Needed Materials" : mode === "builder" ? "Recipe Builder" : mode === "settings" ? "Settings" : itemPage ? items[itemPage]?.name || "Item Page" : "Item Browser"}</h2>
-            <p>
-              {mode === "planner"
-                ? "Expand a craftable card, pick a recipe, then add its ingredients to the list."
-                : mode === "builder"
-                  ? "Create editable recipe packs from a base version, then add items and recipes for servers or modpacks."
-                  : mode === "settings"
-                    ? "Customize CraftCodex's theme and workspace layout."
-                    : "Browse items, inspect recipes, and open dedicated item pages."}
-            </p>
-          </div>
-        </header>
+        {mode === "browser" && itemPage ? null : (
+          <header className="topbar">
+            <div>
+              <h2>{mode === "planner" ? "Needed Materials" : mode === "builder" ? "Recipe Builder" : mode === "settings" ? "Settings" : "Item Browser"}</h2>
+              <p>
+                {mode === "planner"
+                  ? "Expand a craftable card, pick a recipe, then add its ingredients to the list."
+                  : mode === "builder"
+                    ? "Create editable recipe packs from a base version, then add items and recipes for servers or modpacks."
+                    : mode === "settings"
+                      ? "Customize CraftCodex's theme and workspace layout."
+                      : "Browse items, inspect recipes, and open dedicated item pages."}
+              </p>
+            </div>
+          </header>
+        )}
 
         {mode === "settings" ? (
           <section className="settings-panel customize-panel">
@@ -636,7 +613,7 @@ export default function App() {
               onBack={() => setItemPage("")}
               onQuickInfo={openItemModal}
               canEdit={currentIsEditable && !currentIsLocked}
-              onEdit={editItemFromPage}
+              onSaveItem={saveItemDetails}
             />
           ) : (
             <section className="recipe-browser">
@@ -812,14 +789,28 @@ export default function App() {
           </>
         ) : null}
       </aside> : null}
-      {mode === "browser" && rightRailVisible ? (
+      {mode === "browser" && rightRailVisible && itemPage ? (
+        <aside className="checklist item-switcher">
+          <div className="panel-title">
+            <span>All Items</span>
+            <strong>{searchableIds.length}</strong>
+          </div>
+          <div className="item-switcher-grid">
+            {searchableIds.map((id) => (
+              <button className={`item-switcher-card ${itemPage === id ? "active" : ""}`} key={id} onClick={() => { setItemPage(id); setItemModal(""); }} title={items[id].name} aria-label={`View ${items[id].name}`}>
+                <span className="slot"><ItemIcon config={config} id={id} size={24} /></span>
+              </button>
+            ))}
+          </div>
+        </aside>
+      ) : mode === "browser" && rightRailVisible ? (
         <ItemInspector
           config={config}
           itemId={itemModal || itemPage}
           recipes={(itemModal || itemPage) ? recipeLookup[itemModal || itemPage] || [] : []}
           usedIn={(itemModal || itemPage) ? recipesUsingItem(config, itemModal || itemPage) : []}
           canEdit={currentIsEditable && !currentIsLocked}
-          onEdit={editItemFromPage}
+          onSaveItem={saveItemDetails}
           onOpenPage={openItemPage}
         />
       ) : null}

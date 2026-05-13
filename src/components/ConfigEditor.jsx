@@ -42,7 +42,6 @@ export default function ConfigEditor({
           <input placeholder="Display name" value={newItem.name} disabled={currentIsLocked} onChange={(event) => setNewItem((item) => ({ ...item, name: event.target.value }))} />
           <input placeholder="Category optional" value={newItem.category} disabled={currentIsLocked} onChange={(event) => setNewItem((item) => ({ ...item, category: event.target.value }))} />
           <input placeholder="Method" value={newItem.method} disabled={currentIsLocked} onChange={(event) => setNewItem((item) => ({ ...item, method: event.target.value }))} />
-          <input placeholder="Notes" value={newItem.notes} disabled={currentIsLocked} onChange={(event) => setNewItem((item) => ({ ...item, notes: event.target.value }))} />
         </div>
         <div className="sprite-picker">
           <label>
@@ -77,10 +76,14 @@ export default function ConfigEditor({
             ) : null}
           </span>
         </div>
+        <label className="item-notes-field">
+          Notes
+          <textarea placeholder="Describe collection notes, usage, or custom behavior for this item." value={newItem.notes} disabled={currentIsLocked} onChange={(event) => setNewItem((item) => ({ ...item, notes: event.target.value }))} />
+        </label>
         <button onClick={addCustomItem} disabled={currentIsLocked}>Add item</button>
       </section>
       <section>
-        <h3>Edit Recipe</h3>
+        <h3>Add Recipe</h3>
         <div className="settings-row">
           <button onClick={() => setShowNewRecipeStarter(true)} disabled={currentIsLocked}>New recipe</button>
           {recipeDraft ? <button onClick={() => setShowNewRecipeStarter(false)} disabled={currentIsLocked}>Current draft</button> : null}
