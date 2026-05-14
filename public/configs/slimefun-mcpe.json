@@ -1304,8 +1304,8 @@
       "category": "SF_MCPE_Advanced_Machines",
       "method": "slimefun",
       "sprite": {
-        "type": "item",
-        "id": "player_head"
+        "type": "player_head",
+        "texture": "a37741f764dd3dd7adaeb43b63d3959eb70e5eb28f15d6b34cab34a1d1f60387"
       },
       "notes": "A faster geo-miner"
     },
@@ -1344,8 +1344,8 @@
       "category": "SF_MCPE_Advanced_Machines",
       "method": "slimefun",
       "sprite": {
-        "type": "item",
-        "id": "player_head"
+        "type": "player_head",
+        "texture": "a11ed1d1b25b624665ecdddc3d3a5dff0b9f35e3de77a12f516e60fe8501cc8d"
       },
       "notes": "Runs on Nether Stars Must be surrounded by Water Must be supplied with Nether Ice Coolant Cells Causes nearby Entities to get Withered"
     },
@@ -1394,8 +1394,8 @@
       "category": "SF_MCPE_Slimefunextension",
       "method": "slimefun",
       "sprite": {
-        "type": "item",
-        "id": "player_head"
+        "type": "player_head",
+        "texture": "91361e576b493cbfdfae328661cedd1add55fab4e5eb418b92cebf6275f8bb4"
       },
       "notes": "Do not use more than 1 per energy network ⇨ ⚡ J Capacity"
     },
@@ -1404,8 +1404,8 @@
       "category": "SF_MCPE_Slimefunextension",
       "method": "slimefun",
       "sprite": {
-        "type": "item",
-        "id": "player_head"
+        "type": "player_head",
+        "texture": "91361e576b493cbfdfae328661cedd1add55fab4e5eb418b92cebf6275f8bb4"
       },
       "notes": "⇨ ⚡ J Capacity"
     },

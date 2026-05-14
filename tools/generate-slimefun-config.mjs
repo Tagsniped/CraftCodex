@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { spriteFromMaterialOrHead } from "./slimefun-head-textures.mjs";
 
 const workspace = process.cwd();
 const itemsSource = "C:/Users/alexa/Downloads/SlimefunItems.java";
@@ -166,14 +167,13 @@ function parseSlimefunItems() {
 
     const joinedArgs = args.join(", ");
     const material = joinedArgs.match(/Material\.([A-Z0-9_]+)/)?.[1];
-    const hasHeadTexture = /HeadTexture\.|new SlimefunItemStack\("[^"]+",\s*"[a-f0-9]{32,}"/is.test(statement);
     const id = sfId(rawId);
     variableToId[variable] = id;
     items[id] = {
       name: displayName,
       category: slimefunCategory(group),
       method: "slimefun",
-      sprite: hasHeadTexture ? { type: "item", id: "player_head" } : { type: "item", id: material ? vanillaId(material) : "player_head" },
+      sprite: spriteFromMaterialOrHead(statement, args, material),
       notes: lore.join(" "),
     };
   }

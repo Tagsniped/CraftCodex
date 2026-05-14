@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { spriteFromMaterialOrHead } from "./slimefun-head-textures.mjs";
 
 const workspace = process.cwd();
 const sourceDir = "C:/Users/alexa/Downloads/items";
@@ -202,11 +203,12 @@ function parseItems(files) {
       let displayName = titleCase(variable);
       let lore = [];
       let material = statement.match(/Material\.([A-Z0-9_]+)/)?.[1];
-      let hasHeadTexture = /HeadTexture\.|Skulls\.|PlayerHead|Texture/i.test(statement);
+      let spriteArgs = [];
       const constructorArgs = firstCallArgs(statement, "SlimefunItemStack");
 
       if (constructorArgs) {
         const args = splitTopLevel(constructorArgs);
+        spriteArgs = args;
         rawId = stringLiterals(args[0] || "")[0] || variable;
         const parsed = parseDisplayFromArgs(rawId, variable, args);
         displayName = parsed.displayName;
@@ -218,7 +220,6 @@ function parseItems(files) {
         displayName = `${mobName} Data Card`;
         lore = ["Place in a mob simulation chamber to activate"];
         material = null;
-        hasHeadTexture = true;
       } else if (statement.includes("Oscillator.create(")) {
         const materialName = statement.match(/Material\.([A-Z0-9_]+)/)?.[1] || variable.replace(/_OSCILLATOR$/, "");
         rawId = `QUARRY_OSCILLATOR_${materialName}`;
@@ -234,7 +235,7 @@ function parseItems(files) {
         name: displayName,
         category: categoryId(group),
         method: "slimefun",
-        sprite: hasHeadTexture ? { type: "item", id: "player_head" } : { type: "item", id: material ? vanillaId(material) : "player_head" },
+        sprite: spriteFromMaterialOrHead(statement, spriteArgs, material),
         notes: lore.join(" "),
       };
     }

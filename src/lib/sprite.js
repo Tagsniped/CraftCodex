@@ -1,6 +1,23 @@
 import { assetUrl } from "./asset.js";
 
+function minecraftHeadTextureUrl(value = "") {
+  const texture = String(value || "").trim();
+  if (/^[a-f0-9]{32,}$/i.test(texture)) return `https://mc-heads.net/head/${texture}`;
+  if (/^https?:\/\//i.test(texture)) return texture;
+  try {
+    const decoded = JSON.parse(globalThis.atob(texture));
+    const skinUrl = decoded?.textures?.SKIN?.url || "";
+    const hash = skinUrl.match(/\/texture\/([a-f0-9]{32,})$/i)?.[1];
+    return hash ? `https://mc-heads.net/head/${hash}` : skinUrl;
+  } catch {
+    return "";
+  }
+}
+
 export function playerHeadDataUrl(value = "") {
+  const textureUrl = minecraftHeadTextureUrl(value);
+  if (textureUrl) return textureUrl;
+
   const seed = [...String(value || "player_head")].reduce((total, char) => total + char.charCodeAt(0), 0);
   const hue = seed % 360;
   const face = encodeURIComponent(`
