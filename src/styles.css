@@ -2051,6 +2051,9 @@ button {
   display: grid;
   gap: 8px;
   align-content: start;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 2px;
 }
 
 .craft-step {
@@ -2323,8 +2326,9 @@ button {
 
 .checklist {
   display: grid;
-  grid-template-rows: auto minmax(260px, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) minmax(0, auto);
   gap: 16px;
+  min-height: 0;
 }
 
 .checklist.item-inspector {
@@ -2423,6 +2427,10 @@ button {
 .next-actions {
   display: grid;
   gap: 8px;
+  min-height: 0;
+  max-height: 42vh;
+  overflow: auto;
+  padding-right: 2px;
 }
 
 .next-actions h3 {

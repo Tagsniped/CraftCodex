@@ -27,21 +27,27 @@ export function scaleIngredients(recipe, neededQty) {
 
 export function computePlan(goals, craftSteps, completedItems, config) {
   const needs = {};
-  goals.forEach((goal) => addQty(needs, goal.id, goal.qty));
+  const addBalance = (id, qty) => {
+    needs[id] = (needs[id] || 0) + qty;
+  };
+  goals.forEach((goal) => addBalance(goal.id, goal.qty));
 
   const readyCrafts = [];
   craftSteps.forEach((step) => {
     const recipe = config.recipes.find((candidate) => candidate.id === step.recipeId);
     if (!recipe) return;
 
-    addQty(needs, step.id, -step.qty);
+    addBalance(step.id, -step.qty);
     const resolvedRecipe = resolveRecipeIngredientTags(config, recipe, step.tagSelections || {});
     const scaled = scaleIngredients(resolvedRecipe, step.qty);
-    Object.entries(scaled.ingredients).forEach(([id, qty]) => addQty(needs, id, qty));
+    Object.entries(scaled.ingredients).forEach(([id, qty]) => addBalance(id, qty));
     readyCrafts.push({ ...step, recipe: resolvedRecipe, sourceRecipe: recipe, crafts: scaled.crafts });
   });
 
-  Object.entries(completedItems).forEach(([id, qty]) => addQty(needs, id, -qty));
+  Object.entries(completedItems).forEach(([id, qty]) => addBalance(id, -qty));
+  Object.entries(needs).forEach(([id, qty]) => {
+    if (qty <= 0) delete needs[id];
+  });
 
   return { needs, readyCrafts };
 }
