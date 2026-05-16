@@ -1,37 +1,20 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  ArrowLeft,
-  BookOpen,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Download,
-  FileJson,
-  Hammer,
-  Info,
-  Menu,
-  PanelLeft,
-  PanelRight,
-  Pickaxe,
-  Plus,
-  Search,
-  Settings,
-  Tag,
-  Trash2,
-  Upload,
-  X,
-} from "lucide-react";
 import { BUILT_IN_CONFIGS, STARTING_GOALS, loadConfigFile } from "./lib/config.js";
+import { ACCENT_COLORS } from "./lib/theme.js";
 import { isTagIngredient, tagKey, tagChoices } from "./lib/utils.js";
 import { recipesByOutput, recipesUsingItem, scaleIngredients, computePlan, addQty } from "./lib/plan.js";
-import { spriteFor, playerHeadDataUrl } from "./lib/sprite.js";
 import { minecraftZipToConfig } from "./lib/minecraft.js";
-import ItemIcon from "./components/ItemIcon.jsx";
-import RecipeGrid from "./components/RecipeGrid.jsx";
+import AppHeader from "./components/AppHeader.jsx";
+import LeftSidebar from "./components/LeftSidebar.jsx";
+import SettingsPanel from "./components/SettingsPanel.jsx";
+import PlannerView from "./components/PlannerView.jsx";
+import BrowserView from "./components/BrowserView.jsx";
+import BuilderView from "./components/BuilderView.jsx";
+import RightChecklist from "./components/RightChecklist.jsx";
 import ItemInfoModal from "./components/ItemInfoModal.jsx";
 import ItemInspector from "./components/ItemInspector.jsx";
 import ItemPage from "./components/ItemPage.jsx";
-import ConfigEditor from "./components/ConfigEditor.jsx";
+import ItemSwitcher from "./components/ItemSwitcher.jsx";
 
 export default function App() {
   const [config, setConfig] = useState(null);
@@ -64,7 +47,7 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isNarrowViewport, setIsNarrowViewport] = useState(() => (typeof window === "undefined" ? false : window.matchMedia("(max-width: 767px)").matches));
   const [themeMode, setThemeMode] = useState(() => localStorage.getItem("craftpath.themeMode") || "dark");
-  const [accentHue, setAccentHue] = useState(() => Number(localStorage.getItem("craftpath.accentHue") || 38));
+  const [accent, setAccent] = useState(() => localStorage.getItem("craftpath.accent") || "amber");
   const [customText, setCustomText] = useState("");
   const [importEditable, setImportEditable] = useState(false);
   const [newItem, setNewItem] = useState({ id: "", name: "", category: "", method: "craft", spriteMode: "existing", spriteItem: "", sprite: "", spriteHead: "", notes: "" });
@@ -89,7 +72,7 @@ export default function App() {
       setTagSelections({});
     }
     load().catch(() => setMessage("Could not load that config file."));
-  }, [configId, customConfigs]);
+  }, [configId, customConfigs]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     localStorage.setItem("craftpath.configId", configId);
@@ -104,11 +87,12 @@ export default function App() {
   }, [customConfigs]);
 
   useEffect(() => {
+    const hue = (ACCENT_COLORS[accent] || ACCENT_COLORS.amber).hue;
     document.documentElement.dataset.theme = themeMode;
-    document.documentElement.style.setProperty("--accent-hue", accentHue);
+    document.documentElement.style.setProperty("--accent-hue", hue);
     localStorage.setItem("craftpath.themeMode", themeMode);
-    localStorage.setItem("craftpath.accentHue", String(accentHue));
-  }, [themeMode, accentHue]);
+    localStorage.setItem("craftpath.accent", accent);
+  }, [themeMode, accent]);
 
   useEffect(() => {
     if (typeof window === "undefined") return undefined;
@@ -301,11 +285,6 @@ export default function App() {
     }
   }
 
-  function seedEditableConfig() {
-    setCustomText(JSON.stringify(config, null, 2));
-    setMode("builder");
-  }
-
   function createEditableCopy() {
     const copy = {
       ...config,
@@ -417,422 +396,172 @@ export default function App() {
     setExpandedCraftStep("");
   }
 
+  const workspaceTitle = mode === "planner" ? "Needed Materials"
+    : mode === "builder" ? "Recipe Builder"
+    : mode === "settings" ? "Settings"
+    : itemPage ? items[itemPage]?.name || "Item Page"
+    : "Item Browser";
+
+  const workspaceSubtitle = mode === "planner"
+    ? "Expand a craftable card, pick a recipe, then add its ingredients to the list."
+    : mode === "builder"
+      ? "Create editable recipe packs from a base version, then add items and recipes for servers or modpacks."
+      : mode === "settings"
+        ? "Customize CraftCodex's theme and workspace layout."
+        : "Browse items, inspect recipes, and open dedicated item pages.";
+
   return (
     <main className={`app-shell ${mode === "browser" ? "browser-shell" : ""} ${mode === "browser" && currentIsEditable ? "browser-editor-shell" : ""} ${mode === "builder" ? "builder-shell" : ""} ${mode === "settings" ? "settings-shell" : ""} ${leftSidebarOpen ? "" : "left-collapsed"} ${rightRailVisible ? "" : "right-collapsed"} ${mobileMenuOpen ? "mobile-menu-open" : ""}`}>
-      <header className="app-header">
-        <div className="brand compact">
-          <div className="brand-mark"><Pickaxe size={19} /></div>
-          <div>
-            <h1>CraftCodex</h1>
-          </div>
-        </div>
-        <button className="mobile-menu-button settings-button icon-only" onClick={() => setMobileMenuOpen((value) => !value)} aria-label="Open navigation menu" aria-expanded={mobileMenuOpen}>
-          <Menu size={18} />
-        </button>
-        <button className="mobile-sidebar-button settings-button icon-only" onClick={() => setLeftSidebarOpen((value) => !value)} aria-label={leftSidebarOpen ? "Hide item drawer" : "Show item drawer"} aria-expanded={leftSidebarOpen}>
-          <PanelLeft size={18} />
-        </button>
-        <div className="mode-toggle" aria-label="App mode">
-          <button className={mode === "planner" ? "active" : ""} onClick={() => { setMode("planner"); setItemPage(""); setMobileMenuOpen(false); }}>Collection Planner</button>
-          <button className={mode === "browser" ? "active" : ""} onClick={() => { setMode("browser"); setItemPage(""); setMobileMenuOpen(false); }}>Item Browser</button>
-          <button className={mode === "builder" ? "active" : ""} onClick={() => { setMode("builder"); setItemPage(""); setMobileMenuOpen(false); }}>Recipe Builder</button>
-        </div>
-        <div className={`header-tools ${mobileMenuOpen ? "open" : ""}`}>
-          <label className="version-select">
-            <Tag size={14} />
-            <span>Version</span>
-            <strong className="version-value">{selectedConfigEntry?.name || "Select"}</strong>
-            <select value={configId} onChange={(event) => setConfigId(event.target.value)}>
-              {allConfigEntries.map((entry) => (
-                <option value={entry.id} key={entry.id}>{entry.name}</option>
-              ))}
-            </select>
-          </label>
-          <button className="settings-button icon-only" onClick={() => setLeftSidebarOpen((value) => !value)} aria-label={leftSidebarOpen ? "Hide left sidebar" : "Show left sidebar"} title={leftSidebarOpen ? "Hide left sidebar" : "Show left sidebar"}>
-            <PanelLeft size={16} />
-          </button>
-          <button className="settings-button icon-only" onClick={() => setRightSidebarOpen((value) => !value)} aria-label={rightSidebarOpen ? "Hide right sidebar" : "Show right sidebar"} title={rightSidebarOpen ? "Hide right sidebar" : "Show right sidebar"}>
-            <PanelRight size={16} />
-          </button>
-          <button className={`settings-button ${mode === "settings" ? "active" : ""}`} onClick={() => { setMode("settings"); setItemPage(""); setMobileMenuOpen(false); }}>
-            <Settings size={16} /> Settings
-          </button>
-        </div>
-      </header>
+      <AppHeader
+        mode={mode}
+        setMode={setMode}
+        setItemPage={setItemPage}
+        mobileMenuOpen={mobileMenuOpen}
+        setMobileMenuOpen={setMobileMenuOpen}
+        leftSidebarOpen={leftSidebarOpen}
+        setLeftSidebarOpen={setLeftSidebarOpen}
+        rightSidebarOpen={rightSidebarOpen}
+        setRightSidebarOpen={setRightSidebarOpen}
+        configId={configId}
+        setConfigId={setConfigId}
+        allConfigEntries={allConfigEntries}
+        selectedConfigEntry={selectedConfigEntry}
+      />
 
-      {leftSidebarOpen ? <aside className="sidebar">
-        <label className="search-box">
-          <Search size={17} />
-          <input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search items" />
-        </label>
-
-        <div className="search-results">
-          {searchResults.map((id) => (
-            <button key={id} onClick={() => (mode === "planner" ? addGoal(id) : openItemPage(id))} className="result-row">
-              <span className="slot"><ItemIcon config={config} id={id} /></span>
-              <span>{items[id].name}</span>
-              {mode === "planner" ? <Plus size={15} /> : <Info size={15} />}
-            </button>
-          ))}
-        </div>
-
-        {mode === "planner" ? (
-          <section className="goal-panel">
-            <div className="panel-title">
-              <span>Goal List</span>
-              <strong>{goals.length}</strong>
-            </div>
-            {goals.map((goal) => (
-              <div className="goal-row" key={goal.id}>
-                <span className="slot"><ItemIcon config={config} id={goal.id} /></span>
-                <span className="goal-name">{items[goal.id]?.name || goal.id}</span>
-                <input aria-label={`${items[goal.id]?.name || goal.id} quantity`} type="number" min="1" value={goal.qty} onChange={(event) => updateGoal(goal.id, Number(event.target.value))} />
-                <button className="icon-button" onClick={() => removeGoal(goal.id)} aria-label={`Remove ${items[goal.id]?.name || goal.id}`}>
-                  <Trash2 size={15} />
-                </button>
-              </div>
-            ))}
-          </section>
-        ) : mode === "builder" ? (
-          <section className="goal-panel builder-nav">
-            <div className="panel-title">
-              <span>Builder Status</span>
-              <strong>{config.recipes.length}</strong>
-            </div>
-            <p>{currentIsEditable ? currentIsLocked ? "This recipe pack is locked." : "This recipe pack is editable." : "Create an editable copy to build a custom recipe list."}</p>
-            <button className="category-row active" onClick={currentIsEditable ? toggleCurrentLock : createEditableCopy}>
-              <FileJson size={15} />
-              <span>{currentIsEditable ? currentIsLocked ? "Unlock Recipe Pack" : "Lock Recipe Pack" : "Create Editable Copy"}</span>
-            </button>
-          </section>
-        ) : (
-          <section className="goal-panel">
-            <div className="panel-title">
-              <span>Browse Categories</span>
-              <strong>{browserItems.length}</strong>
-            </div>
-            {categories.slice(0, 9).map((category) => (
-              <button className={`category-row ${browserCategory === category ? "active" : ""}`} key={category} onClick={() => setBrowserCategory(category)}>
-                <BookOpen size={15} />
-                <span>{category}</span>
-              </button>
-            ))}
-          </section>
-        )}
-      </aside> : null}
+      {leftSidebarOpen ? (
+        <LeftSidebar
+          mode={mode}
+          config={config}
+          items={items}
+          query={query}
+          setQuery={setQuery}
+          searchResults={searchResults}
+          goals={goals}
+          updateGoal={updateGoal}
+          removeGoal={removeGoal}
+          addGoal={addGoal}
+          openItemPage={openItemPage}
+          browserCategory={browserCategory}
+          setBrowserCategory={setBrowserCategory}
+          categories={categories}
+          browserItems={browserItems}
+          currentIsEditable={currentIsEditable}
+          currentIsLocked={currentIsLocked}
+          toggleCurrentLock={toggleCurrentLock}
+          createEditableCopy={createEditableCopy}
+        />
+      ) : null}
 
       <section className="workspace">
-        {mode === "browser" && itemPage ? null : (
-          <header className="topbar">
-            <div>
-              <h2>{mode === "planner" ? "Needed Materials" : mode === "builder" ? "Recipe Builder" : mode === "settings" ? "Settings" : "Item Browser"}</h2>
-              <p>
-                {mode === "planner"
-                  ? "Expand a craftable card, pick a recipe, then add its ingredients to the list."
-                  : mode === "builder"
-                    ? "Create editable recipe packs from a base version, then add items and recipes for servers or modpacks."
-                    : mode === "settings"
-                      ? "Customize CraftCodex's theme and workspace layout."
-                      : "Browse items, inspect recipes, and open dedicated item pages."}
-              </p>
-            </div>
-          </header>
-        )}
+        <header className="topbar">
+          <div>
+            <h2>{workspaceTitle}</h2>
+            <p>{workspaceSubtitle}</p>
+          </div>
+        </header>
 
         {mode === "settings" ? (
-          <section className="settings-panel customize-panel">
-            <div>
-              <span className="eyebrow">Customize webpage</span>
-              <h3>Appearance</h3>
-            </div>
-            <div className="settings-row">
-              <label>
-                Theme
-                <select value={themeMode} onChange={(event) => setThemeMode(event.target.value)}>
-                  <option value="dark">Dark mode</option>
-                  <option value="light">Light mode</option>
-                </select>
-              </label>
-              <label className="hue-control">
-                <span>Color hue</span>
-                <input type="range" min="0" max="360" value={accentHue} onChange={(event) => setAccentHue(Number(event.target.value))} />
-                <b>{accentHue}°</b>
-              </label>
-              <button onClick={() => setAccentHue(38)}>Reset orange/yellow</button>
-            </div>
-          </section>
-        ) : null}
-
-        {mode === "settings" ? null : mode === "builder" ? (
-          <section className="recipe-builder">
-            <section className="builder-config-panel">
-              <div className="pack-status-row">
-                <div>
-                  <span className="eyebrow">Current recipe pack</span>
-                  <h3>{config.meta?.name}</h3>
-                  <p>{Object.keys(config.items).length} items · {config.recipes.length} recipes · {Object.keys(config.stations || {}).length} station layouts</p>
-                </div>
-                <strong>{currentIsEditable ? currentIsLocked ? "Locked" : "Editable" : "Read only"}</strong>
-              </div>
-              <div className="settings-row">
-                <label>
-                  Recipe config
-                  <select value={configId} onChange={(event) => setConfigId(event.target.value)}>
-                    {allConfigEntries.map((entry) => (
-                      <option value={entry.id} key={entry.id}>{entry.name}</option>
-                    ))}
-                  </select>
-                </label>
-                <label className="import-button">
-                  <Upload size={16} /> Import config
-                  <input type="file" accept="application/json,.json,.zip,application/zip" onChange={handleFileImport} />
-                </label>
-                <label className="toggle-control settings-toggle">
-                  <input type="checkbox" checked={importEditable} onChange={() => setImportEditable((value) => !value)} />
-                  <span>Import as editable</span>
-                </label>
-                <button onClick={createEditableCopy}><FileJson size={16} /> Create editable copy</button>
-                <button onClick={downloadCurrentConfig}><Download size={16} /> Download pack</button>
-                {currentIsEditable ? <button onClick={toggleCurrentLock}>{currentIsLocked ? "Unlock config" : "Lock config"}</button> : null}
-              </div>
-              <details className="advanced-json">
-                <summary>Full config JSON</summary>
-                <textarea value={customText} onChange={(event) => setCustomText(event.target.value)} placeholder="Paste or edit a recipe config JSON file here." />
-                <div className="settings-row">
-                  <button onClick={saveEditableConfig}>Save Editable Config</button>
-                  <p>{currentIsEditable ? currentIsLocked ? "Current config is locked." : "Current config is editable." : "Built-in configs are read-only. Create an editable copy to modify recipes."} {message}</p>
-                </div>
-              </details>
-            </section>
-
-            {currentIsEditable ? (
-              <>
-                <div className={`builder-lock-note ${currentIsLocked ? "locked" : ""}`}>
-                  {currentIsLocked ? "This recipe pack is locked so you can use it without accidental edits. Unlock it when you want to change items or recipes." : "This recipe pack is editable. Add custom items, paste recipe JSON, or modify recipes copied from the selected base version."}
-                </div>
-                <ConfigEditor
-                  config={config}
-                  currentIsLocked={currentIsLocked}
-                  newItem={newItem}
-                  setNewItem={setNewItem}
-                  addCustomItem={addCustomItem}
-                  editingRecipeId={editingRecipeId}
-                  beginRecipeEdit={beginRecipeEdit}
-                  createRecipeDraft={createRecipeDraft}
-                  recipeDraft={recipeDraft}
-                  setRecipeDraft={setRecipeDraft}
-                  saveRecipeDraft={saveRecipeDraft}
-                />
-              </>
-            ) : (
-              <div className="empty-builder">
-                <FileJson size={34} />
-                <h3>Start from the selected Minecraft version</h3>
-                <p>Built-in recipe packs stay read-only. Create an editable copy when you want a server, modpack, or personal override file.</p>
-                <button className="primary-action" onClick={createEditableCopy}>Create editable copy</button>
-              </div>
-            )}
-          </section>
+          <SettingsPanel themeMode={themeMode} setThemeMode={setThemeMode} accent={accent} setAccent={setAccent} />
+        ) : mode === "builder" ? (
+          <BuilderView
+            config={config}
+            configId={configId}
+            setConfigId={setConfigId}
+            allConfigEntries={allConfigEntries}
+            currentIsEditable={currentIsEditable}
+            currentIsLocked={currentIsLocked}
+            importEditable={importEditable}
+            setImportEditable={setImportEditable}
+            customText={customText}
+            setCustomText={setCustomText}
+            handleFileImport={handleFileImport}
+            saveEditableConfig={saveEditableConfig}
+            createEditableCopy={createEditableCopy}
+            toggleCurrentLock={toggleCurrentLock}
+            message={message}
+            newItem={newItem}
+            setNewItem={setNewItem}
+            addCustomItem={addCustomItem}
+            editingRecipeId={editingRecipeId}
+            beginRecipeEdit={beginRecipeEdit}
+            createRecipeDraft={createRecipeDraft}
+            recipeDraft={recipeDraft}
+            setRecipeDraft={setRecipeDraft}
+            saveRecipeDraft={saveRecipeDraft}
+          />
+        ) : mode === "browser" && itemPage ? (
+          <ItemPage
+            config={config}
+            itemId={itemPage}
+            recipes={recipeLookup[itemPage] || []}
+            usedIn={recipesUsingItem(config, itemPage)}
+            onBack={() => setItemPage("")}
+            onQuickInfo={openItemModal}
+            canEdit={currentIsEditable && !currentIsLocked}
+            onEdit={editItemFromPage}
+          />
         ) : mode === "browser" ? (
-          itemPage ? (
-            <ItemPage
-              config={config}
-              itemId={itemPage}
-              recipes={recipeLookup[itemPage] || []}
-              usedIn={recipesUsingItem(config, itemPage)}
-              onBack={() => setItemPage("")}
-              onQuickInfo={openItemModal}
-              canEdit={currentIsEditable && !currentIsLocked}
-              onSaveItem={saveItemDetails}
-            />
-          ) : (
-            <section className="recipe-browser">
-              <div className="mobile-category-chips" aria-label="Browse categories">
-                {categories.map((category) => (
-                  <button className={browserCategory === category ? "active" : ""} key={category} onClick={() => setBrowserCategory(category)}>
-                    {category}
-                  </button>
-                ))}
-              </div>
-              <div className="browser-toolbar">
-                <span>{browserCategory} · {browserItems.length} items</span>
-                <div className="browser-toolbar-controls">
-                  <label className="toggle-control">
-                    <input type="checkbox" checked={groupBrowserItems} onChange={() => setGroupBrowserItems((value) => !value)} />
-                    <span>Group by category</span>
-                  </label>
-                  <label className="toggle-control">
-                    <input type="checkbox" checked={showBrowserNames} onChange={() => setShowBrowserNames((value) => !value)} />
-                    <span>Show names</span>
-                  </label>
-                </div>
-              </div>
-              {groupBrowserItems ? (
-                Object.entries(browserGroups).map(([category, ids]) => (
-                  <section className="browser-group" key={category}>
-                    <div className="browser-group-title">
-                      <h3>{category}</h3>
-                      <span>{ids.length}</span>
-                    </div>
-                    <div className={`browser-grid ${showBrowserNames ? "" : "icon-only"}`}>
-                      {ids.map((id) => (
-                        <button className="browser-card" key={id} onClick={() => openItemModal(id)} title={items[id].name} aria-label={items[id].name}>
-                          <span className="slot"><ItemIcon config={config} id={id} size={24} /></span>
-                          {showBrowserNames ? <strong>{items[id].name}</strong> : null}
-                        </button>
-                      ))}
-                    </div>
-                  </section>
-                ))
-              ) : (
-                <div className={`browser-grid flat ${showBrowserNames ? "" : "icon-only"}`}>
-                  {browserItems.map((id) => (
-                    <button className="browser-card" key={id} onClick={() => openItemModal(id)} title={items[id].name} aria-label={items[id].name}>
-                      <span className="slot"><ItemIcon config={config} id={id} size={24} /></span>
-                      {showBrowserNames ? <strong>{items[id].name}</strong> : null}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </section>
-          )
+          <BrowserView
+            items={items}
+            config={config}
+            categories={categories}
+            browserCategory={browserCategory}
+            setBrowserCategory={setBrowserCategory}
+            browserItems={browserItems}
+            browserGroups={browserGroups}
+            groupBrowserItems={groupBrowserItems}
+            setGroupBrowserItems={setGroupBrowserItems}
+            showBrowserNames={showBrowserNames}
+            setShowBrowserNames={setShowBrowserNames}
+            openItemModal={openItemModal}
+          />
         ) : (
-          <section className="material-board">
-            {materialBoardEntries.map(([id, qty, completed]) => {
-            const recipes = recipeLookup[id] || [];
-            const recipeIndex = recipeChoices[id] || 0;
-            const recipe = recipes[recipeIndex];
-            const isExpanded = expanded[id];
-            const isCraftable = !completed && recipes.length > 0;
-            return (
-              <article className={`material-card ${completed || checked[id] ? "done" : ""} ${completed ? "crafted" : ""} ${selectedMaterial === id ? "selected" : ""}`} key={`${id}-${completed ? "crafted" : "needed"}`}>
-                <button className="material-head" onClick={() => handleMaterialCardClick(id, isCraftable, completed)}>
-                  <span className="slot large"><ItemIcon config={config} id={id} size={32} /></span>
-                  <span>
-                    <strong>{items[id].name}</strong>
-                    <em>{completed ? "Crafted and checked" : isCraftable ? `${recipes.length} recipe${recipes.length === 1 ? "" : "s"}` : items[id].method}</em>
-                  </span>
-                  <b>x{qty}</b>
-                  {completed ? <span className="crafted-mark"><Check size={14} /> done</span> : null}
-                </button>
-
-                {isExpanded && !completed ? (
-                  <div className="recipe-expansion">
-                    {recipe ? (
-                      <>
-                        <div className="recipe-toolbar">
-                          <button disabled={recipes.length < 2} onClick={() => changeRecipe(id, -1)}><ChevronLeft size={15} /></button>
-                          <span>{recipe.station} · {recipe.type} · {recipeIndex + 1}/{recipes.length}</span>
-                          <button disabled={recipes.length < 2} onClick={() => changeRecipe(id, 1)}><ChevronRight size={15} /></button>
-                        </div>
-                        <RecipeGrid
-                          config={config}
-                          recipe={recipe}
-                          interactiveTags
-                          tagSelections={Object.fromEntries(
-                            Object.keys(config.tags || {}).map((key) => [key, tagSelections[`${recipe.id}:${key}`]]).filter(([, choice]) => choice)
-                          )}
-                          onTagSelect={(key, choice) => setRecipeTagChoice(recipe.id, key, choice)}
-                        />
-                        <div className="recipe-actions">
-                          <button className="primary-action" onClick={() => addMaterials(id, qty)}>
-                            <Plus size={15} /> Add materials to list
-                          </button>
-                          <button className="more-info-button inline" onClick={() => openItemModal(id)}><Info size={14} /> More info</button>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <p className="material-note">{items[id].notes || "No recipe is configured for this item."}</p>
-                        <div className="recipe-actions">
-                          <button className="primary-action" onClick={() => setChecked((current) => ({ ...current, [id]: !current[id] }))}>
-                            <Check size={15} /> {checked[id] ? "Unmark collected" : "Mark collected"}
-                          </button>
-                          <button className="more-info-button inline" onClick={() => openItemModal(id)}><Info size={14} /> More info</button>
-                        </div>
-                      </>
-                    )}
-                  </div>
-                ) : null}
-              </article>
-            );
-            })}
-          </section>
+          <PlannerView
+            materialBoardEntries={materialBoardEntries}
+            items={items}
+            config={config}
+            recipeLookup={recipeLookup}
+            recipeChoices={recipeChoices}
+            expanded={expanded}
+            selectedMaterial={selectedMaterial}
+            checked={checked}
+            tagSelections={tagSelections}
+            handleMaterialCardClick={handleMaterialCardClick}
+            changeRecipe={changeRecipe}
+            setRecipeTagChoice={setRecipeTagChoice}
+            addMaterials={addMaterials}
+            setChecked={setChecked}
+            openItemModal={openItemModal}
+          />
         )}
       </section>
 
-      {mode === "planner" && (rightSidebarOpen || isNarrowViewport) ? <aside className="checklist">
-        {mode === "planner" ? (
-          <>
-            <div className="progress-card">
-              <div className="progress-ring" style={{ "--progress": `${checklistEntries.length ? Math.round((collectedCount / checklistEntries.length) * 100) : 0}%` }}>
-                <span>{checklistEntries.length ? Math.round((collectedCount / checklistEntries.length) * 100) : 0}%</span>
-              </div>
-              <div>
-                <h2>Crafting Steps</h2>
-                <p>{allCollected ? "Collected. Craft the queued items now." : `${collectedCount} of ${checklistEntries.length} checklist rows confirmed`}</p>
-              </div>
-            </div>
+      {mode === "planner" && (rightSidebarOpen || isNarrowViewport) ? (
+        <RightChecklist
+          checklistEntries={checklistEntries}
+          collectedCount={collectedCount}
+          allCollected={allCollected}
+          items={items}
+          config={config}
+          plan={plan}
+          expandedCraftStep={expandedCraftStep}
+          setExpandedCraftStep={setExpandedCraftStep}
+          stepIsReady={stepIsReady}
+          completeCraft={completeCraft}
+          checked={checked}
+          setChecked={setChecked}
+        />
+      ) : null}
 
-            <div className="craft-step-list">
-              {plan.readyCrafts.map((step) => {
-                const isOpen = expandedCraftStep === `${step.id}-${step.recipeId}`;
-                const isReady = stepIsReady(step);
-                return (
-                  <article className={`craft-step ${isReady ? "ready" : ""}`} key={`${step.id}-${step.recipeId}`}>
-                    <button className="craft-step-head" onClick={() => setExpandedCraftStep(isOpen ? "" : `${step.id}-${step.recipeId}`)}>
-                      <span className="slot"><ItemIcon config={config} id={step.id} /></span>
-                      <span>
-                        <strong>{items[step.id]?.name || step.id}</strong>
-                        <em>{isReady ? `Craft ${step.crafts} time${step.crafts === 1 ? "" : "s"}` : "Waiting on materials"}</em>
-                      </span>
-                      {isReady ? <Check size={16} /> : <Hammer size={16} />}
-                    </button>
-                    {isOpen ? (
-                      <div className="craft-step-detail">
-                        <RecipeGrid config={config} recipe={step.recipe} />
-                        <button className="primary-action" onClick={() => completeCraft(step)} disabled={!isReady}>
-                          <Check size={15} /> Complete craft
-                        </button>
-                      </div>
-                    ) : null}
-                  </article>
-                );
-              })}
-            </div>
-
-            <section className="next-actions">
-              <h3>Collection Checklist</h3>
-              {checklistEntries.map(([id, qty, completed]) => (
-                <label className={`resource-row ${completed || checked[id] ? "done" : ""}`} key={`${id}-${completed ? "completed" : "needed"}`}>
-                  <input type="checkbox" checked={Boolean(completed || checked[id])} disabled={Boolean(completed)} onChange={() => setChecked((current) => ({ ...current, [id]: !current[id] }))} />
-                  <span className="checkmark"><Check size={14} /></span>
-                  <span className="slot"><ItemIcon config={config} id={id} /></span>
-                  <span className="resource-copy">
-                    <strong>{items[id].name}</strong>
-                    <em>{completed ? "Crafted and confirmed in your inventory." : items[id].notes}</em>
-                  </span>
-                  <b>x{qty}</b>
-                </label>
-              ))}
-            </section>
-          </>
-        ) : null}
-      </aside> : null}
       {mode === "browser" && rightRailVisible && itemPage ? (
-        <aside className="checklist item-switcher">
-          <div className="panel-title">
-            <span>All Items</span>
-            <strong>{searchableIds.length}</strong>
-          </div>
-          <div className="item-switcher-grid">
-            {searchableIds.map((id) => (
-              <button className={`item-switcher-card ${itemPage === id ? "active" : ""}`} key={id} onClick={() => { setItemPage(id); setItemModal(""); }} title={items[id].name} aria-label={`View ${items[id].name}`}>
-                <span className="slot"><ItemIcon config={config} id={id} size={24} /></span>
-              </button>
-            ))}
-          </div>
-        </aside>
+        <ItemSwitcher
+          config={config}
+          items={items}
+          searchableIds={searchableIds}
+          itemPage={itemPage}
+          setItemPage={setItemPage}
+          setItemModal={setItemModal}
+        />
       ) : mode === "browser" && rightRailVisible ? (
         <ItemInspector
           config={config}
@@ -840,18 +569,21 @@ export default function App() {
           recipes={(itemModal || itemPage) ? recipeLookup[itemModal || itemPage] || [] : []}
           usedIn={(itemModal || itemPage) ? recipesUsingItem(config, itemModal || itemPage) : []}
           canEdit={currentIsEditable && !currentIsLocked}
-          onSaveItem={saveItemDetails}
+          onEdit={editItemFromPage}
           onOpenPage={openItemPage}
         />
       ) : null}
-      {mode === "browser" && rightRailVisible ? null : <ItemInfoModal
-        config={config}
-        itemId={itemModal}
-        recipes={modalRecipes}
-        usedIn={modalUsedIn}
-        onClose={() => setItemModal("")}
-        onOpenPage={() => openItemPage(itemModal)}
-      />}
+
+      {mode === "browser" && rightRailVisible ? null : (
+        <ItemInfoModal
+          config={config}
+          itemId={itemModal}
+          recipes={modalRecipes}
+          usedIn={modalUsedIn}
+          onClose={() => setItemModal("")}
+          onOpenPage={() => openItemPage(itemModal)}
+        />
+      )}
     </main>
   );
 }
