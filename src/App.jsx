@@ -498,7 +498,7 @@ export default function App() {
             onBack={() => setItemPage("")}
             onQuickInfo={openItemModal}
             canEdit={currentIsEditable && !currentIsLocked}
-            onEdit={editItemFromPage}
+            onSaveItem={saveItemDetails}
           />
         ) : mode === "browser" ? (
           <BrowserView
@@ -569,7 +569,7 @@ export default function App() {
           recipes={(itemModal || itemPage) ? recipeLookup[itemModal || itemPage] || [] : []}
           usedIn={(itemModal || itemPage) ? recipesUsingItem(config, itemModal || itemPage) : []}
           canEdit={currentIsEditable && !currentIsLocked}
-          onEdit={editItemFromPage}
+          onSaveItem={saveItemDetails}
           onOpenPage={openItemPage}
         />
       ) : null}
