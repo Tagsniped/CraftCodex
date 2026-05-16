@@ -3088,3 +3088,40 @@ button {
     display: none;
   }
 }
+
+.accent-picker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.accent-picker > span {
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.accent-swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.accent-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.1s, border-color 0.1s;
+}
+
+.accent-swatch:hover {
+  transform: scale(1.15);
+}
+
+.accent-swatch.selected {
+  border-color: var(--text);
+  transform: scale(1.15);
+}
